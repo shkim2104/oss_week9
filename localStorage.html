@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Local Storage 예제</title>
+
+    <script>
+        console.log("현재 페이지 경로" , location.pathname);
+
+        if(!localStorage.getItem("hasvisited")){
+        
+            alert("어서오십셔 호갱님!");
+            localStorage.setItem("hasVisited" , "true");
+        }
+        else {
+            console.log("뭐 어쩌라고");
+        }
+
+    </script>
+</head>    
