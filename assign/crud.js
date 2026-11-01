@@ -1,6 +1,7 @@
 const API_URL = "https://6ae7413156b2ee1e54403e32.mockapi.io/restaurants";
 const tbody = document.querySelector("#list");
 const statusMsg = document.querySelector("#status");
+const searchInput = document.querySelector("#search");
 let restaurants = []; 
 
 async function loadRestaurants() {
@@ -30,3 +31,34 @@ function render(list) {
 }
 
 loadRestaurants(); 
+
+
+const form = document.querySelector("#form");
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault(); 
+
+  const data = {
+    name: document.querySelector("#name").value.trim(),
+    category: document.querySelector("#category").value.trim(),
+    location: document.querySelector("#location").value.trim(),
+    menu: document.querySelector("#menu").value.trim(),
+    rating: Number(document.querySelector("#rating").value),
+  };
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",                                   
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),                              
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    form.reset();
+    await loadRestaurants();                                            
+    statusMsg.textContent = "추가되었습니다.";
+
+  } catch (error) {
+    statusMsg.textContent = `추가 실패: ${error.message}`;
+  }
+});
