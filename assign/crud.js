@@ -3,6 +3,8 @@ const tbody = document.querySelector("#list");
 const statusMsg = document.querySelector("#status");
 const searchInput = document.querySelector("#search");
 let restaurants = []; 
+let editingId = null;
+const submitBtn = document.querySelector("#submitBtn");
 
 async function loadRestaurants() {
   statusMsg.textContent = "불러오는 중...";
@@ -28,12 +30,17 @@ function render(list) {
     });
 
     const actionTd = document.createElement("td");
+    const editBtn = document.createElement("button");
     const delBtn = document.createElement("button");
+
+    editBtn.textContent = "수정";
+    editBtn.addEventListener("click", () => editRestaurant(item.id));
 
     delBtn.textContent = "삭제";
     delBtn.addEventListener("click", () => deleteRestaurant(item.id));
 
     actionTd.appendChild(delBtn);
+    actionTd.appendChild(editBtn);
     tr.appendChild(actionTd);
     tbody.appendChild(tr);
   });
@@ -58,7 +65,7 @@ async function deleteRestaurant(id) {
   } catch (error) {
     statusMsg.textContent = `삭제 실패: ${error.message}`;
   }
-  
+
 }
 
 loadRestaurants(); 
@@ -67,7 +74,7 @@ loadRestaurants();
 const form = document.querySelector("#form");
 
 form.addEventListener("submit", async (event) => {
-  event.preventDefault(); 
+  event.preventDefault();
 
   const data = {
     name: document.querySelector("#name").value.trim(),
@@ -77,20 +84,51 @@ form.addEventListener("submit", async (event) => {
     rating: Number(document.querySelector("#rating").value),
   };
 
+  const url = editingId ? `${API_URL}/${editingId}` : API_URL;
+  const method = editingId ? "PUT" : "POST";
+  const doneMsg = editingId ? "수정되었습니다." : "추가되었습니다.";
+
   try {
-    const response = await fetch(API_URL, {
-      method: "POST",                                   
+    const response = await fetch(url, {
+      method: method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),                              
+      body: JSON.stringify(data),
     });
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
     form.reset();
-    await loadRestaurants();                                            
-    statusMsg.textContent = "추가되었습니다.";
+    editingId = null;
 
+    submitBtn.textContent = "추가";
+    
+    await loadRestaurants();
+    statusMsg.textContent = doneMsg;
+    
   } catch (error) {
-    statusMsg.textContent = `추가 실패: ${error.message}`;
+    statusMsg.textContent = `저장 실패: ${error.message}`;
   }
 });
 
+async function editRestaurant(id) {
+    try{
+        const response = await fetch(`${API_URL}/${id}`);
+
+        if(!response.ok){
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const item = await response.json();
+
+        document.querySelector("#name").value = item.name;
+        document.querySelector("#category").value = item.category;
+        document.querySelector("#location").value = item.location;
+        document.querySelector("#menu").value = item.menu;
+        document.querySelector("#rating").value = item.rating;
+
+        editingId = id;
+        submitBtn.textContent = "수정 완료";
+    } catch(error){
+        statusMsg.textContent = `수정 실패: ${error.message}`;
+    }
+}    
