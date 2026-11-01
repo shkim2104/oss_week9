@@ -84,6 +84,13 @@ form.addEventListener("submit", async (event) => {
     rating: Number(document.querySelector("#rating").value),
   };
 
+  const errorMsg = vaildationData(data);
+
+  if(errorMsg){
+    statusMsg.textContent = errorMsg;
+    return;
+  }
+  
   const url = editingId ? `${API_URL}/${editingId}` : API_URL;
   const method = editingId ? "PUT" : "POST";
   const doneMsg = editingId ? "수정되었습니다." : "추가되었습니다.";
@@ -132,3 +139,24 @@ async function editRestaurant(id) {
         statusMsg.textContent = `수정 실패: ${error.message}`;
     }
 }    
+
+function vaildationData(data){
+    if(data.name === ""){
+        return "이름을 입력하세요.";
+    }
+
+    if(data.category === ""){
+        return "카테고리를 입력하세요.";
+    }
+    if(data.location === ""){
+        return "위치를 입력하세요.";
+    }    
+    if(data.menu === ""){
+        return "메뉴를 입력하세요.";
+    }
+    if(isNaN(data.rating) || data.rating < 0 || data.rating > 5){
+        return "평점은 1~5점 사이로 작성";
+    }
+
+    return "";
+}
