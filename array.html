@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+
+    <title>
+        병신
+    </title>
+    <script>
+        const students = [
+            {id: 1, name:"kim",score:90},
+            {id: 2, name:"na",score:80},
+            {id: 3, name:"park",score:75},
+            {id: 4, name:"lee",score:60}
+        ];
+
+        const student = students.find(function(students){
+            return  student.name === "lee";
+        });
+
+        console.log(student);
+    </script>
+</head>
+<body>
+
+</body>
+</html>

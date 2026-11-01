@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>맛집관리 crud</title>
+    <style>
+        body{
+            font-family: sans-serif; margin: 40px;
+            #itemInput{
+                width: 200px; padding: 6px;
+            }
+            button{padding: 6px 12px; cursor: pointer;}
+
+            #itemList li{
+                margin: 6px 0;
+            }
+            table {
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+        }
+
+        body {
+            background-color: #f4f6f8;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        th, td {
+            padding: 8px;
+            border-bottom: 1px solid #dddddd;
+        }
+
+        tbody tr:hover {
+            background-color: #fdf2e9;
+        }
+
+        button {
+            border: none;
+            border-radius: 4px;
+            background-color: #e67e22;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #d35400;
+        }
+
+    </style>
+    </head>
+
+    <body>
+        <h1>맛집관리</h1>
+
+        <div>
+            <input type = "text" id = "storename" placeholder = "맛집 이름을 입력하세요">
+            <input type = "text" id = "foodcategory" placeholder = "음식 종류">
+            <input type = "text" id = "storelocation" placeholder = "도로명 주소">
+            <input type = "text" id = "storemenu" placeholder = "대표메뉴">
+            <input type = "text" id = "rating" placeholder = "평점">
+            <button id = "addButton">추가히기</button>
+        </div>
+
+        <div>
+
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>맛집 이름</th>
+                    <th>음식 종류</th>
+                    <th>주소</th>
+                    <th>대표메뉴</th>
+                    <th>평점</th>
+                    <th>설정</th>
+                </tr>
+            </thead>
+            <tbody id = "restaurantList"></tbody>
+        </table>
+
+        <script>
+            let restaurants = [
+                {id : 1, name : "카츠닉", category : "일식", location : "포항 북구", menu : "돈카츠", rating : 5},
+                {id : 2, name : "헤이안", category : "카페", location : "포항 북구", menu : "라떼", rating : 4},
+                {id : 3, name : "김종구", category : "한식", location : "포항 북구", menu : "국밥", rating : 4.5}
+            ];
+
+            let pushId = 4;
+            let changId = null;
+
+            window.onload = function(){
+                const nameInput = document.getElementById("storename");
+                const categoryInput = document.getElementById("foodcategory");
+                const locationInput = document.getElementById("storelocation");
+                const ratingInput = document.getElementById("rating");
+                const menuInput = document.getElementById("storemenu");
+                const addButton = document.getElementById("addButton");
+                const restaurantList = document.querySelector("#restaurantList");
+
+
+                function render(list){
+                    restaurantList.innerText = "";
+
+                    list.forEach(function(i) {
+                        const tr = document.createElement("tr");
+
+                        const TodoId = document.createElement("td");
+                        TodoId.innerText = i.id;
+
+                        const TodoName = document.createElement("td");
+                        TodoName.innerText = i.name;
+
+                        const TodoCategory = document.createElement("td");
+                        TodoCategory.innerText = i.category;
+
+                        const TodoLocation = document.createElement("td");
+                        TodoLocation.innerText = i.location;
+
+                        const TodoMenu = document.createElement("td");
+                        TodoMenu.innerText = i.menu;
+
+                        const TodoRating = document.createElement("td");
+                        TodoRating.innerText = i.rating;
+
+                        const TodoSetting = document.createElement("td");
+
+                        const editButton = document.createElement("button");
+                        editButton.innerText = "수정";
+
+                        const deleteButton = document.createElement("button");
+                        deleteButton.innerText = "삭제";
+
+                        editButton.addEventListener("click" , function() {
+                            Edit(i.id);
+                        });
+
+                        deleteButton.addEventListener("click" , function() {
+                            Delete(i.id);
+                        });
+
+                        TodoSetting.appendChild(editButton);
+                        TodoSetting.appendChild(deleteButton);
+
+                        tr.appendChild(TodoId);
+                        tr.appendChild(TodoName);
+                        tr.appendChild(TodoCategory);
+                        tr.appendChild(TodoLocation);
+                        tr.appendChild(TodoMenu);
+                        tr.appendChild(TodoRating);
+                        tr.appendChild(TodoSetting);
+                        restaurantList.appendChild(tr);
+
+
+
+                    });
+                };
+
+                addButton.addEventListener("click", function() {
+                    if (nameInput.value.trim() === "" || categoryInput.value.trim() === "" ||
+                        locationInput.value.trim() === "" || menuInput.value.trim() === "" ||
+                        ratingInput.value.trim() === "") {
+                        alert("입력해주세요");
+                        return;
+                    }
+
+                    if (nameInput.value.trim().length < 2 || nameInput.value.trim().length > 20) {
+                        alert("맛집 이름은 가게상호명");
+                        nameInput.focus();
+                        return;
+                    }
+
+                    if (menuInput.value.trim().length > 30) {
+                        alert("대표메뉴는 하나만 ");
+                        menuInput.focus();
+                        return;
+                    }
+
+                    const ratingValue = Number(ratingInput.value);
+                    if (!(ratingValue >= 0 && ratingValue <= 5)) {
+                        alert("평점 = 5에서 0점 사이");
+                        ratingInput.focus();
+                        return;
+                    }
+
+                    if (changId !== null) {
+                        
+                        const item = restaurants.find(function(r) {
+                            return r.id === changId;
+                        });
+
+                        item.name = nameInput.value.trim();
+                        item.category = categoryInput.value.trim();
+                        item.location = locationInput.value.trim();
+                        item.menu = menuInput.value.trim();
+                        item.rating = Number(ratingInput.value);
+
+                        changId = null;
+                        addButton.innerText = "추가히기";
+
+                    } else {
+                        restaurants.push({
+                            id : pushId,
+                            name : nameInput.value.trim(),
+                            category : categoryInput.value.trim(),
+                            location : locationInput.value.trim(),
+                            menu : menuInput.value.trim(),
+                            rating : Number(ratingInput.value)
+                        });
+
+                        pushId++;
+                    }
+
+                    render(restaurants);
+
+                    nameInput.value = "";
+                    categoryInput.value = "";
+                    locationInput.value = "";
+                    menuInput.value = "";
+                    ratingInput.value = "";
+
+                });
+
+                function Edit(id) {
+                    const item = restaurants.find(function(r) {
+                        return r.id === id;
+                    });
+
+                    nameInput.value = item.name;
+                    categoryInput.value = item.category;
+                    locationInput.value = item.location;
+                    menuInput.value = item.menu;
+                    ratingInput.value = item.rating;
+
+                    changId = id;
+                    addButton.innerText = "저장";
+
+                }
+
+                function Delete(id) {
+                    if (!confirm("삭제하시겠습니까?")) {
+                        return;
+                    }
+
+                    restaurants = restaurants.filter(function(r) {
+                        return r.id !== id;
+                    });
+
+                    if (changId === id) {
+                        changId = null;
+                        addButton.innerText = "추가히기";
+                        nameInput.value = "";
+                        categoryInput.value = "";
+                        locationInput.value = "";
+                        menuInput.value = "";
+                        ratingInput.value = "";
+                    }
+
+                    render(restaurants);
+                }
+
+                render(restaurants);
+            }
+        </script>
+    </body>
+</html>
