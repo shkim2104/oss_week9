@@ -68,6 +68,20 @@ async function deleteRestaurant(id) {
 
 }
 
+searchInput.addEventListener("input", () => {
+  const keyword = searchInput.value.trim().toLowerCase();
+  
+  const result = restaurants.filter(item =>
+    (item.name || "").toLowerCase().includes(keyword) ||
+    (item.category || "").toLowerCase().includes(keyword)
+  );
+
+  render(result);
+  statusMsg.textContent = result.length === 0
+    ? "검색 결과가 없습니다."
+    : `${result.length}개 검색됨`;
+});
+
 loadRestaurants(); 
 
 
@@ -90,7 +104,7 @@ form.addEventListener("submit", async (event) => {
     statusMsg.textContent = errorMsg;
     return;
   }
-  
+
   const url = editingId ? `${API_URL}/${editingId}` : API_URL;
   const method = editingId ? "PUT" : "POST";
   const doneMsg = editingId ? "수정되었습니다." : "추가되었습니다.";
@@ -154,7 +168,7 @@ function vaildationData(data){
     if(data.menu === ""){
         return "메뉴를 입력하세요.";
     }
-    if(isNaN(data.rating) || data.rating < 0 || data.rating > 5){
+    if(isNaN(data.rating) || data.rating < 1 || data.rating > 5){
         return "평점은 1~5점 사이로 작성";
     }
 
