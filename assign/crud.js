@@ -26,8 +26,39 @@ function render(list) {
       td.textContent = value;
       tr.appendChild(td);
     });
+
+    const actionTd = document.createElement("td");
+    const delBtn = document.createElement("button");
+
+    delBtn.textContent = "삭제";
+    delBtn.addEventListener("click", () => deleteRestaurant(item.id));
+
+    actionTd.appendChild(delBtn);
+    tr.appendChild(actionTd);
     tbody.appendChild(tr);
   });
+}
+
+async function deleteRestaurant(id) {
+
+  if(!confirm("정말 삭제할까요?")){
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    
+    if (!response.ok){
+        throw new Error(`HTTP ${response.status}`);
+    } 
+
+    await loadRestaurants();
+    statusMsg.textContent = "삭제되었습니다.";
+
+  } catch (error) {
+    statusMsg.textContent = `삭제 실패: ${error.message}`;
+  }
+  
 }
 
 loadRestaurants(); 
@@ -52,7 +83,7 @@ form.addEventListener("submit", async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),                              
     });
-    
+
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     form.reset();
     await loadRestaurants();                                            
@@ -62,3 +93,4 @@ form.addEventListener("submit", async (event) => {
     statusMsg.textContent = `추가 실패: ${error.message}`;
   }
 });
+
